@@ -44,19 +44,23 @@
 <script>
   const video = document.getElementById('cow-video');
 
+  // Only 'click', 'touchend' and 'keydown' count as real user activation
+  // for browsers to allow enabling audio; 'pointerdown'/'touchstart' do
+  // not, and calling play() from those can even stop playback.
   function armFirstInteractionUnmute() {
     const onFirstInteraction = () => {
       video.muted = false;
-      video.play();
-      document.removeEventListener('pointerdown', onFirstInteraction);
-      document.removeEventListener('touchstart', onFirstInteraction);
-      document.removeEventListener('keydown', onFirstInteraction);
-      document.removeEventListener('scroll', onFirstInteraction);
+      video.play().catch(() => {});
+      cleanup();
     };
-    document.addEventListener('pointerdown', onFirstInteraction);
-    document.addEventListener('touchstart', onFirstInteraction);
+    function cleanup() {
+      document.removeEventListener('click', onFirstInteraction);
+      document.removeEventListener('touchend', onFirstInteraction);
+      document.removeEventListener('keydown', onFirstInteraction);
+    }
+    document.addEventListener('click', onFirstInteraction);
+    document.addEventListener('touchend', onFirstInteraction);
     document.addEventListener('keydown', onFirstInteraction);
-    document.addEventListener('scroll', onFirstInteraction);
   }
 
   // Safety net: if anything ever pauses the video (stray gesture, OS
