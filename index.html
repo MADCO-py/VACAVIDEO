@@ -36,7 +36,7 @@
 <body>
 
 <div id="stage">
-  <video id="cow-video" playsinline webkit-playsinline preload="auto" autoplay loop>
+  <video id="cow-video" playsinline webkit-playsinline preload="auto" autoplay muted loop>
     <source src="img/VACA.mp4" type="video/mp4">
   </video>
 </div>
@@ -44,20 +44,20 @@
 <script>
   const video = document.getElementById('cow-video');
 
-  // Only 'click', 'touchend' and 'keydown' count as real user activation
-  // for browsers to allow enabling audio; 'pointerdown'/'touchstart' do
-  // not, and calling play() from those can even stop playback.
-  function armFirstInteractionUnmute() {
+  // 'muted' lives on the HTML element itself so the browser's own
+  // autoplay always succeeds immediately, with no JS race. Sound is
+  // enabled on the first real user gesture. Browsers only count
+  // 'click', 'touchend' and 'keydown' as valid gestures for that;
+  // 'pointerdown'/'touchstart' don't qualify and can even interrupt
+  // playback if used to call play().
+  function unmuteOnFirstInteraction() {
     const onFirstInteraction = () => {
       video.muted = false;
       video.play().catch(() => {});
-      cleanup();
-    };
-    function cleanup() {
       document.removeEventListener('click', onFirstInteraction);
       document.removeEventListener('touchend', onFirstInteraction);
       document.removeEventListener('keydown', onFirstInteraction);
-    }
+    };
     document.addEventListener('click', onFirstInteraction);
     document.addEventListener('touchend', onFirstInteraction);
     document.addEventListener('keydown', onFirstInteraction);
@@ -69,16 +69,8 @@
     if (!video.ended) video.play().catch(() => {});
   });
 
-  video.muted = false;
-  const attempt = video.play();
-
-  if (attempt !== undefined) {
-    attempt.catch(() => {
-      video.muted = true;
-      video.play().catch(() => {});
-      armFirstInteractionUnmute();
-    });
-  }
+  video.play().catch(() => {});
+  unmuteOnFirstInteraction();
 </script>
 
 </body>
