@@ -29,27 +29,7 @@
     display: block;
   }
 
-  #sound-hint {
-    position: fixed;
-    inset: 0;
-    display: none;
-    align-items: flex-end;
-    justify-content: center;
-    padding-bottom: 8vh;
-    pointer-events: none;
-  }
 
-  #sound-hint.visible {
-    display: flex;
-  }
-
-  #sound-hint span {
-    background: rgba(0, 0, 0, 0.55);
-    color: #fff;
-    font: 14px/1 -apple-system, system-ui, sans-serif;
-    padding: 10px 16px;
-    border-radius: 999px;
-  }
 </style>
 </head>
 <body>
@@ -58,31 +38,24 @@
   <video id="cow-video" playsinline webkit-playsinline preload="auto" autoplay loop>
     <source src="img/VACA.mp4" type="video/mp4">
   </video>
-
-  <div id="sound-hint"><span>Toca para activar el sonido</span></div>
 </div>
 
 <script>
   const video = document.getElementById('cow-video');
-  const hint = document.getElementById('sound-hint');
 
-  function unmute() {
-    video.muted = false;
-    hint.classList.remove('visible');
-  }
-
-  function armFirstTouchUnmute() {
-    hint.classList.add('visible');
+  function armFirstInteractionUnmute() {
     const onFirstInteraction = () => {
-      unmute();
+      video.muted = false;
       video.play();
       document.removeEventListener('pointerdown', onFirstInteraction);
       document.removeEventListener('touchstart', onFirstInteraction);
       document.removeEventListener('keydown', onFirstInteraction);
+      document.removeEventListener('scroll', onFirstInteraction);
     };
     document.addEventListener('pointerdown', onFirstInteraction);
     document.addEventListener('touchstart', onFirstInteraction);
     document.addEventListener('keydown', onFirstInteraction);
+    document.addEventListener('scroll', onFirstInteraction);
   }
 
   video.muted = false;
@@ -92,7 +65,7 @@
     attempt.catch(() => {
       video.muted = true;
       video.play().catch(() => {});
-      armFirstTouchUnmute();
+      armFirstInteractionUnmute();
     });
   }
 </script>
