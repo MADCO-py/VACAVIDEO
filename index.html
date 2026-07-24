@@ -27,6 +27,7 @@
     height: 100%;
     object-fit: contain;
     display: block;
+    pointer-events: none;
   }
 
 
@@ -57,6 +58,12 @@
     document.addEventListener('keydown', onFirstInteraction);
     document.addEventListener('scroll', onFirstInteraction);
   }
+
+  // Safety net: if anything ever pauses the video (stray gesture, OS
+  // media-session interruption, etc.), resume playback immediately.
+  video.addEventListener('pause', () => {
+    if (!video.ended) video.play().catch(() => {});
+  });
 
   video.muted = false;
   const attempt = video.play();
